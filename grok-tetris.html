@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO BLOCKS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 0% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(0, 255, 128, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #0ff;
+            margin-bottom: 15px;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 40px #0ff,
+                0 0 80px #0ff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff; }
+            to { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff, 0 0 120px #0ff; }
+        }
+
+        .board-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(135deg, #0ff, #f0f, #0f8);
+            border-radius: 5px;
+        }
+
+        .board-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #0ff, #f0f, #0f8);
+            border-radius: 7px;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.7;
+        }
+
+        #game-board {
+            display: block;
+            background: #0a0a12;
+            border-radius: 3px;
+        }
+
+        .side-panel {
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
+            border: 1px solid rgba(0,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 130px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            to { left: 100%; }
+        }
+
+        .info-box h3 {
+            font-size: 10px;
+            color: #0ff;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .info-box p {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #next-canvas {
+            background: #0a0a12;
+            border-radius: 5px;
+        }
+
+        .controls {
+            background: rgba(0,255,255,0.05);
+            border: 1px solid rgba(0,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 10px;
+            color: #888;
+            line-height: 2;
+            letter-spacing: 1px;
+        }
+
+        .controls span {
+            color: #0ff;
+        }
+
+        #game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, rgba(255,0,0,0.1), rgba(0,0,0,0.9));
+            border: 2px solid #f00;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255,0,0,0.5);
+        }
+
+        #game-over h2 {
+            color: #f00;
+            font-size: 36px;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px #f00;
+            animation: flicker 0.5s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        #game-over p {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #final-score {
+            color: #0ff;
+            font-size: 48px;
+            font-weight: 900;
+            text-shadow: 0 0 30px #0ff;
+        }
+
+        #restart-btn {
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            padding: 15px 40px;
+            font-size: 14px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        #restart-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 30px #0ff;
+        }
+
+        /* AI名表示（ゲーム内） */
+        .ai-name {
+            font-size: 42px;
+            font-weight: 900;
+            color: #f0f;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            text-shadow: 
+                0 0 10px #f0f,
+                0 0 20px #f0f,
+                0 0 40px #f0f;
+        }
+
+        /* AI名表示（結果画面） */
+        .ai-name-result {
+            font-size: 48px;
+            font-weight: 900;
+            color: #f0f;
+            letter-spacing: 6px;
+            margin-top: 20px;
+            text-shadow: 
+                0 0 10px #f0f,
+                0 0 20px #f0f,
+                0 0 40px #f0f;
+        }
+
+        /* スマホ用操作説明 */
+        .mobile-help {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+            text-align: center;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        /* スマホ表示時 */
+        @media (max-width: 768px), (pointer: coarse) {
+            .mobile-help {
+                display: block;
+            }
+            
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+                padding-bottom: 60px;
+                gap: 10px;
+            }
+            
+            .side-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                order: -1;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            /* ゲーム画面サイズ */
+            #game-board {
+                width: 240px !important;
+                height: 480px !important;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 3px;
+                letter-spacing: 4px;
+            }
+            
+            .ai-name {
+                font-size: 28px;
+                margin-bottom: 8px;
+                letter-spacing: 4px;
+            }
+            
+            .board-wrapper {
+                padding: 2px;
+            }
+            
+            .info-box {
+                padding: 6px 10px;
+                min-width: 60px;
+            }
+            
+            .info-box h3 {
+                font-size: 8px;
+                margin-bottom: 3px;
+            }
+            
+            .info-box p {
+                font-size: 16px;
+            }
+            
+            #next-canvas {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1) 0px,
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="game-container">
+        <div class="main-area">
+            <h1>NEO BLOCKS</h1>
+            <div class="ai-name">Grok</div>
+            <div class="board-wrapper">
+                <canvas id="game-board"></canvas>
+            </div>
+        </div>
+        <div class="side-panel">
+            <div class="info-box">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="info-box">
+                <h3>Lines</h3>
+                <p id="lines">0</p>
+            </div>
+            <div class="info-box">
+                <h3>Level</h3>
+                <p id="level">1</p>
+            </div>
+            <div class="info-box">
+                <h3>Next</h3>
+                <canvas id="next-canvas" width="100" height="100"></canvas>
+            </div>
+            <div class="controls">
+                <span>←→</span> 移動<br>
+                <span>↑/SPACE</span> 回転<br>
+                <span>↓</span> 落下
+            </div>
+        </div>
+    </div>
+
+    <!-- スマホ用操作説明 -->
+    <div class="mobile-help">タップ:回転　フリック↔:移動　フリック↓:落下</div>
+
+    <div id="game-over">
+        <div class="game-over-content">
+            <h2>GAME OVER</h2>
+            <p>FINAL SCORE</p>
+            <div id="final-score">0</div>
+            <div class="ai-name-result">Grok</div>
+            <p id="event-history">Events: None</p>
+            <button id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // ゲーム設定
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = 30;
+
+        // キャンバス設定
+        const canvas = document.getElementById('game-board');
+        const ctx = canvas.getContext('2d');
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+
+        const nextCanvas = document.getElementById('next-canvas');
+        const nextCtx = nextCanvas.getContext('2d');
+
+        // ネオンカラーのテトリミノ
+        const TETROMINOS = {
+            I: { shape: [[1,1,1,1]], color: '#00f5ff', glow: '#00f5ff' },
+            O: { shape: [[1,1],[1,1]], color: '#ffff00', glow: '#ffff00' },
+            T: { shape: [[0,1,0],[1,1,1]], color: '#ff00ff', glow: '#ff00ff' },
+            S: { shape: [[0,1,1],[1,1,0]], color: '#00ff88', glow: '#00ff88' },
+            Z: { shape: [[1,1,0],[0,1,1]], color: '#ff0055', glow: '#ff0055' },
+            J: { shape: [[1,0,0],[1,1,1]], color: '#0088ff', glow: '#0088ff' },
+            L: { shape: [[0,0,1],[1,1,1]], color: '#ff8800', glow: '#ff8800' }
+        };
+
+        const TETROMINO_NAMES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+
+        // ゲーム状態
+        let board = [];
+        let currentPiece = null;
+        let nextPiece = null;
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let gameOver = false;
+        let dropInterval = 1000;
+        let lastDrop = 0;
+        let lastMutation = 0;
+        let mutationInterval = 1000; // 毎秒チェック
+
+        // ソフトドロップ用
+        let softDropping = false;
+        const SOFT_DROP_INTERVAL = 50;
+
+        // 新機能: Chaos Portal
+        let portals = []; // {x1, y1, x2, y2}
+
+        // 新機能: Apocalypse Event
+        let activeEvent = null;
+        let eventTimer = 0;
+        let eventHistory = [];
+
+        // Web Audio API 効果音システム
+        let audioCtx = null;
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // 回転音
+        function playRotateSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // 設置音
+        function playLockSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        // ライン消去音
+        function playLineClearSound(lineCount) {
+            if (!audioCtx) return;
+            const baseFreq = 400 + lineCount * 100;
+            for (let i = 0; i < lineCount; i++) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                const startTime = audioCtx.currentTime + i * 0.08;
+                osc.frequency.setValueAtTime(baseFreq + i * 150, startTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq + i * 150 + 200, startTime + 0.15);
+                gain.gain.setValueAtTime(0.3, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+                osc.start(startTime);
+                osc.stop(startTime + 0.2);
+            }
+        }
+
+        // ゲームオーバー音
+        function playGameOverSound() {
+            if (!audioCtx) return;
+            const frequencies = [400, 350, 300, 200];
+            frequencies.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                const startTime = audioCtx.currentTime + i * 0.2;
+                osc.frequency.setValueAtTime(freq, startTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.5, startTime + 0.3);
+                gain.gain.setValueAtTime(0.2, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                osc.start(startTime);
+                osc.stop(startTime + 0.4);
+            });
+        }
+
+        // 新機能音: Mutation音
+        function playMutationSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        // 新機能音: Portal音
+        function playPortalSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // 新機能音: Apocalypse音
+        function playApocalypseSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // ボード初期化
+        function initBoard() {
+            board = [];
+            for (let row = 0; row < ROWS; row++) {
+                board[row] = [];
+                for (let col = 0; col < COLS; col++) {
+                    board[row][col] = 0;
+                }
+            }
+            portals = [];
+            addPortals();
+        }
+
+        // 新機能: Chaos Portal追加
+        function addPortals() {
+            const numPortals = Math.min(Math.floor(level / 5) + 1, 3);
+            portals = [];
+            for (let i = 0; i < numPortals; i++) {
+                let x1 = Math.floor(Math.random() * COLS);
+                let y1 = Math.floor(Math.random() * (ROWS - 5)) + 5; // 下部寄り
+                let x2 = Math.floor(Math.random() * COLS);
+                let y2 = Math.floor(Math.random() * (ROWS - 5)) + 5;
+                while (x1 === x2 && y1 === y2) {
+                    x2 = Math.floor(Math.random() * COLS);
+                    y2 = Math.floor(Math.random() * (ROWS - 5)) + 5;
+                }
+                portals.push({x1, y1, x2, y2});
+                board[y1][x1] = {type: 'portal'};
+                board[y2][x2] = {type: 'portal'};
+            }
+        }
+
+        // ランダムなテトリミノを生成
+        function randomTetromino() {
+            const name = TETROMINO_NAMES[Math.floor(Math.random() * TETROMINO_NAMES.length)];
+            const tetromino = TETROMINOS[name];
+            return {
+                shape: tetromino.shape.map(row => [...row]),
+                color: tetromino.color,
+                glow: tetromino.glow,
+                x: Math.floor(COLS / 2) - Math.floor(tetromino.shape[0].length / 2),
+                y: 0
+            };
+        }
+
+        // 衝突判定 (ポータル考慮)
+        function collision(piece, offsetX = 0, offsetY = 0) {
+            for (let row = 0; row < piece.shape.length; row++) {
+                for (let col = 0; col < piece.shape[row].length; col++) {
+                    if (piece.shape[row][col]) {
+                        const newX = piece.x + col + offsetX;
+                        const newY = piece.y + row + offsetY;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) {
+                            return true;
+                        }
+                        if (newY >= 0 && board[newY][newX] && board[newY][newX].type !== 'portal') {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // ゴーストピースのY座標を計算 (ポータル考慮なし)
+        function getGhostY() {
+            let ghostY = currentPiece.y;
+            while (!collision(currentPiece, 0, ghostY - currentPiece.y + 1)) {
+                ghostY++;
+            }
+            return ghostY;
+        }
+
+        // 新機能: Quantum Mutation
+        function mutatePiece() {
+            const oldShape = currentPiece.shape;
+            const newName = TETROMINO_NAMES[Math.floor(Math.random() * TETROMINO_NAMES.length)];
+            currentPiece.shape = TETROMINOS[newName].shape.map(row => [...row]);
+            if (collision(currentPiece)) {
+                currentPiece.shape = oldShape;
+            } else {
+                playMutationSound();
+                // ビジュアルエフェクト: 簡易的にフラッシュ
+                ctx.globalAlpha = 0.5;
+                draw();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // 新機能: Check for portal teleport
+        function checkPortalTeleport() {
+            for (let row = 0; row < currentPiece.shape.length; row++) {
+                for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                    if (currentPiece.shape[row][col]) {
+                        const px = currentPiece.x + col;
+                        const py = currentPiece.y + row;
+                        for (let p of portals) {
+                            if (px === p.x1 && py === p.y1) {
+                                currentPiece.x = p.x2 - col;
+                                currentPiece.y = p.y2 - row;
+                                rotate(); // 回転反転ボーナス
+                                playPortalSound();
+                                return true;
+                            } else if (px === p.x2 && py === p.y2) {
+                                currentPiece.x = p.x1 - col;
+                                currentPiece.y = p.y1 - row;
+                                rotate();
+                                playPortalSound();
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // ピースを固定
+        function lockPiece() {
+            for (let row = 0; row < currentPiece.shape.length; row++) {
+                for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                    if (currentPiece.shape[row][col]) {
+                        const boardY = currentPiece.y + row;
+                        const boardX = currentPiece.x + col;
+                        if (boardY >= 0) {
+                            board[boardY][boardX] = { color: currentPiece.color, glow: currentPiece.glow };
+                        }
+                    }
+                }
+            }
+            playLockSound();
+            clearLines();
+            currentPiece = nextPiece;
+            nextPiece = randomTetromino();
+            if (collision(currentPiece)) {
+                gameOver = true;
+                playGameOverSound();
+                showGameOver();
+            }
+        }
+
+        // ライン消去 (ポータルは消えない)
+        function clearLines() {
+            let linesCleared = 0;
+            for (let row = ROWS - 1; row >= 0; row--) {
+                if (board[row].every(cell => cell !== 0 && cell.type !== 'portal')) {
+                    board.splice(row, 1);
+                    board.unshift(Array(COLS).fill(0));
+                    linesCleared++;
+                    row++;
+                }
+            }
+            if (linesCleared > 0) {
+                playLineClearSound(linesCleared);
+                const points = [0, 100, 300, 500, 800];
+                score += points[linesCleared] * level;
+                lines += linesCleared;
+                level = Math.floor(lines / 3) + 1;
+                dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                addPortals(); // レベルアップでポータル更新
+                checkApocalypse();
+                updateDisplay();
+            }
+        }
+
+        // 新機能: Apocalypse Eventトリガー
+        function checkApocalypse() {
+            if (score % 1000 === 0 && score > 0) {
+                triggerApocalypse();
+            }
+        }
+
+        function triggerApocalypse() {
+            playApocalypseSound();
+            const events = [
+                'earthquake',
+                'colorblind',
+                'piecerain',
+                'bonustime'
+            ];
+            activeEvent = events[Math.floor(Math.random() * events.length)];
+            eventTimer = activeEvent === 'colorblind' ? 5000 : activeEvent === 'bonustime' ? 10000 : 0;
+            eventHistory.push(activeEvent);
+            // 即時効果
+            if (activeEvent === 'earthquake') {
+                board.shift();
+                board.push(Array(COLS).fill(0));
+            } else if (activeEvent === 'piecerain') {
+                for (let i = 0; i < 5; i++) {
+                    const x = Math.floor(Math.random() * COLS);
+                    const color = TETROMINOS[TETROMINO_NAMES[Math.floor(Math.random() * 7)]].color;
+                    board[0][x] = {color, glow: color};
+                }
+            }
+        }
+
+        // 回転
+        function rotate() {
+            const rotated = [];
+            for (let col = 0; col < currentPiece.shape[0].length; col++) {
+                rotated[col] = [];
+                for (let row = currentPiece.shape.length - 1; row >= 0; row--) {
+                    rotated[col].push(currentPiece.shape[row][col]);
+                }
+            }
+            const originalShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+            if (collision(currentPiece)) {
+                currentPiece.shape = originalShape;
+            } else {
+                playRotateSound();
+            }
+        }
+
+        // 描画
+        function draw() {
+            // ボードクリア
+            ctx.fillStyle = '#0a0a12';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // グリッド線
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 0.5;
+            for (let row = 0; row <= ROWS; row++) {
+                ctx.beginPath();
+                ctx.moveTo(0, row * BLOCK_SIZE);
+                ctx.lineTo(canvas.width, row * BLOCK_SIZE);
+                ctx.stroke();
+            }
+            for (let col = 0; col <= COLS; col++) {
+                ctx.beginPath();
+                ctx.moveTo(col * BLOCK_SIZE, 0);
+                ctx.lineTo(col * BLOCK_SIZE, canvas.height);
+                ctx.stroke();
+            }
+
+            // 固定ブロック描画
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (board[row][col]) {
+                        if (board[row][col].type === 'portal') {
+                            drawPortal(ctx, col, row);
+                        } else {
+                            let color = board[row][col].color;
+                            if (activeEvent === 'colorblind') {
+                                color = ['#ff0000', '#00ff00', '#0000ff', '#ffff00'][Math.floor(Math.random() * 4)];
+                            }
+                            drawBlock(ctx, col, row, color, board[row][col].glow);
+                        }
+                    }
+                }
+            }
+
+            // ゴーストピース描画
+            if (currentPiece) {
+                const ghostY = getGhostY();
+                for (let row = 0; row < currentPiece.shape.length; row++) {
+                    for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                        if (currentPiece.shape[row][col]) {
+                            drawGhostBlock(ctx, currentPiece.x + col, ghostY + row, currentPiece.color);
+                        }
+                    }
+                }
+            }
+
+            // 現在のピース描画
+            if (currentPiece) {
+                for (let row = 0; row < currentPiece.shape.length; row++) {
+                    for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                        if (currentPiece.shape[row][col]) {
+                            let color = currentPiece.color;
+                            if (activeEvent === 'colorblind') {
+                                color = ['#ff0000', '#00ff00', '#0000ff', '#ffff00'][Math.floor(Math.random() * 4)];
+                            }
+                            drawBlock(ctx, currentPiece.x + col, currentPiece.y + row, color, currentPiece.glow);
+                        }
+                    }
+                }
+            }
+
+            // 次のピース描画
+            nextCtx.fillStyle = '#0a0a12';
+            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+            if (nextPiece) {
+                const offsetX = (5 - nextPiece.shape[0].length) / 2;
+                const offsetY = (5 - nextPiece.shape.length) / 2;
+                for (let row = 0; row < nextPiece.shape.length; row++) {
+                    for (let col = 0; col < nextPiece.shape[row].length; col++) {
+                        if (nextPiece.shape[row][col]) {
+                            drawBlockSmall(nextCtx, offsetX + col, offsetY + row, nextPiece.color, nextPiece.glow);
+                        }
+                    }
+                }
+            }
+        }
+
+        // ブロック描画（ネオン風）
+        function drawBlock(context, x, y, color, glow) {
+            const bx = x * BLOCK_SIZE;
+            const by = y * BLOCK_SIZE;
+            const size = BLOCK_SIZE - 2;
+
+            // グロー効果
+            context.shadowColor = glow;
+            context.shadowBlur = 15;
+
+            // メインブロック
+            context.fillStyle = color;
+            context.fillRect(bx + 1, by + 1, size, size);
+
+            // 内側のハイライト
+            context.shadowBlur = 0;
+            context.fillStyle = 'rgba(255,255,255,0.3)';
+            context.fillRect(bx + 3, by + 3, size - 4, 3);
+            context.fillRect(bx + 3, by + 3, 3, size - 4);
+
+            // 枠線
+            context.strokeStyle = 'rgba(255,255,255,0.5)';
+            context.lineWidth = 1;
+            context.strokeRect(bx + 1, by + 1, size, size);
+        }
+
+        // ゴーストブロック描画
+        function drawGhostBlock(context, x, y, color) {
+            const bx = x * BLOCK_SIZE;
+            const by = y * BLOCK_SIZE;
+            const size = BLOCK_SIZE - 2;
+
+            context.strokeStyle = color;
+            context.lineWidth = 2;
+            context.globalAlpha = 0.3;
+            context.strokeRect(bx + 2, by + 2, size - 2, size - 2);
+            context.globalAlpha = 1;
+        }
+
+        // 小さいブロック描画（Next用）
+        function drawBlockSmall(context, x, y, color, glow) {
+            const bx = x * 20;
+            const by = y * 20;
+            const size = 18;
+
+            context.shadowColor = glow;
+            context.shadowBlur = 10;
+            context.fillStyle = color;
+            context.fillRect(bx, by, size, size);
+            context.shadowBlur = 0;
+        }
+
+        // 新機能: Portal描画
+        function drawPortal(context, x, y) {
+            const bx = x * BLOCK_SIZE;
+            const by = y * BLOCK_SIZE;
+            context.fillStyle = 'rgba(128, 0, 255, 0.5)';
+            context.fillRect(bx, by, BLOCK_SIZE, BLOCK_SIZE);
+            context.beginPath();
+            context.arc(bx + BLOCK_SIZE/2, by + BLOCK_SIZE/2, BLOCK_SIZE/3, 0, Math.PI * 2);
+            context.strokeStyle = '#ff00ff';
+            context.lineWidth = 3;
+            context.stroke();
+        }
+
+        // 表示更新
+        function updateDisplay() {
+            document.getElementById('score').textContent = score.toLocaleString();
+            document.getElementById('lines').textContent = lines;
+            document.getElementById('level').textContent = level;
+        }
+
+        // ゲームオーバー表示
+        function showGameOver() {
+            document.getElementById('game-over').style.display = 'flex';
+            document.getElementById('final-score').textContent = score.toLocaleString();
+            document.getElementById('event-history').textContent = 'Events: ' + eventHistory.join(', ');
+        }
+
+        // キー入力
+        document.addEventListener('keydown', (e) => {
+            if (gameOver) return;
+            
+            // 初回キー入力でAudioContextを初期化
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (!collision(currentPiece, -1, 0)) {
+                        currentPiece.x--;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!collision(currentPiece, 1, 0)) {
+                        currentPiece.x++;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (!softDropping) {
+                        softDropping = true;
+                    }
+                    break;
+                case 'ArrowUp':
+                case ' ':
+                    e.preventDefault();
+                    rotate();
+                    break;
+            }
+            draw();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowDown') {
+                softDropping = false;
+            }
+        });
+
+        // === スマホ対応: タッチ操作 ===
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            // 初回タッチでAudioContextを初期化
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            const deltaTime = Date.now() - touchStartTime;
+            
+            const minSwipeDistance = 30;
+            
+            // タップ（短時間で移動距離が少ない）= 回転
+            if (deltaTime < 200 && Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                rotate();
+            }
+            // 横スワイプ = 左右移動
+            else if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                    // 右スワイプ
+                    if (!collision(currentPiece, 1, 0)) {
+                        currentPiece.x++;
+                    }
+                } else {
+                    // 左スワイプ
+                    if (!collision(currentPiece, -1, 0)) {
+                        currentPiece.x--;
+                    }
+                }
+            }
+            // 下スワイプ = ソフトドロップ
+            else if (deltaY > minSwipeDistance && Math.abs(deltaY) > Math.abs(deltaX)) {
+                // 一気に数マス落とす
+                for (let i = 0; i < 3; i++) {
+                    if (!collision(currentPiece, 0, 1)) {
+                        currentPiece.y++;
+                    }
+                }
+            }
+            
+            draw();
+        }, { passive: false });
+
+        // リスタート
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            document.getElementById('game-over').style.display = 'none';
+            init();
+        });
+
+        // ゲームループ
+        function gameLoop(timestamp) {
+            if (!gameOver) {
+                let currentInterval = softDropping ? SOFT_DROP_INTERVAL : dropInterval;
+                if (activeEvent === 'bonustime') {
+                    currentInterval *= 2; // 速度半分
+                }
+                if (timestamp - lastDrop > currentInterval) {
+                    if (!collision(currentPiece, 0, 1)) {
+                        currentPiece.y++;
+                        checkPortalTeleport();
+                    } else {
+                        lockPiece();
+                    }
+                    lastDrop = timestamp;
+                }
+                // Quantum Mutationチェック
+                if (timestamp - lastMutation > mutationInterval) {
+                    if (Math.random() < 0.1) { // 1/10確率
+                        mutatePiece();
+                    }
+                    lastMutation = timestamp;
+                }
+                // Eventタイマー
+                if (eventTimer > 0) {
+                    eventTimer -= (timestamp - (lastDrop || timestamp));
+                    if (eventTimer <= 0) {
+                        activeEvent = null;
+                    }
+                }
+                draw();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 初期化
+        function init() {
+            initBoard();
+            score = 0;
+            lines = 0;
+            level = 1;
+            dropInterval = 1000;
+            gameOver = false;
+            softDropping = false;
+            activeEvent = null;
+            eventHistory = [];
+            currentPiece = randomTetromino();
+            nextPiece = randomTetromino();
+            updateDisplay();
+            lastDrop = 0;
+            lastMutation = 0;
+        }
+
+        // ゲーム開始
+        init();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

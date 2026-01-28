@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAOS BLOCKS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 0% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(0, 255, 128, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #0ff;
+            margin-bottom: 15px;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 40px #0ff,
+                0 0 80px #0ff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff; }
+            to { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff, 0 0 120px #0ff; }
+        }
+
+        .board-wrapper {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(135deg, #0ff, #f0f, #0f8);
+            border-radius: 5px;
+            transition: transform 0.1s;
+        }
+
+        .board-wrapper.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            10% { transform: translateX(-10px) rotate(-2deg); }
+            20% { transform: translateX(10px) rotate(2deg); }
+            30% { transform: translateX(-10px) rotate(-2deg); }
+            40% { transform: translateX(10px) rotate(2deg); }
+            50% { transform: translateX(-5px) rotate(-1deg); }
+            60% { transform: translateX(5px) rotate(1deg); }
+            70% { transform: translateX(-5px) rotate(-1deg); }
+            80% { transform: translateX(5px) rotate(1deg); }
+            90% { transform: translateX(-2px) rotate(0); }
+        }
+
+        .board-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #0ff, #f0f, #0f8);
+            border-radius: 7px;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.7;
+        }
+
+        #game-board {
+            display: block;
+            background: #0a0a12;
+            border-radius: 3px;
+        }
+
+        .side-panel {
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
+            border: 1px solid rgba(0,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 130px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            to { left: 100%; }
+        }
+
+        .info-box h3 {
+            font-size: 10px;
+            color: #0ff;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .info-box p {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #next-canvas {
+            background: #0a0a12;
+            border-radius: 5px;
+        }
+
+        .controls {
+            background: rgba(0,255,255,0.05);
+            border: 1px solid rgba(0,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 10px;
+            color: #888;
+            line-height: 2;
+            letter-spacing: 1px;
+        }
+
+        .controls span {
+            color: #0ff;
+        }
+
+        #game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, rgba(255,0,0,0.1), rgba(0,0,0,0.9));
+            border: 2px solid #f00;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255,0,0,0.5);
+        }
+
+        #game-over h2 {
+            color: #f00;
+            font-size: 36px;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px #f00;
+            animation: flicker 0.5s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        #game-over p {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #final-score {
+            color: #0ff;
+            font-size: 48px;
+            font-weight: 900;
+            text-shadow: 0 0 30px #0ff;
+        }
+
+        #restart-btn {
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            padding: 15px 40px;
+            font-size: 14px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        #restart-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 30px #0ff;
+        }
+
+        /* AI名表示（ゲーム内） */
+        .ai-name {
+            font-size: 42px;
+            font-weight: 900;
+            color: #f0f;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            text-shadow: 
+                0 0 10px #f0f,
+                0 0 20px #f0f,
+                0 0 40px #f0f;
+        }
+
+        /* AI名表示（結果画面） */
+        .ai-name-result {
+            font-size: 48px;
+            font-weight: 900;
+            color: #f0f;
+            letter-spacing: 6px;
+            margin-top: 20px;
+            text-shadow: 
+                0 0 10px #f0f,
+                0 0 20px #f0f,
+                0 0 40px #f0f;
+        }
+
+        /* スマホ用コントロールボタン（Qボタンのみ） */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 50px;
+            right: 15px;
+            z-index: 200;
+        }
+
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            background: rgba(255, 0, 255, 0.2);
+            border: 2px solid #f0f;
+            border-radius: 50%;
+            color: #f0f;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            text-shadow: 0 0 10px #f0f;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            transition: all 0.1s;
+        }
+
+        .mobile-btn:active {
+            background: rgba(255, 0, 255, 0.5);
+            transform: scale(0.95);
+        }
+
+        /* スマホ用操作説明 */
+        .mobile-help {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+            text-align: center;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        /* スマホ表示時 */
+        @media (max-width: 768px), (pointer: coarse) {
+            .mobile-controls {
+                display: block;
+            }
+            
+            .mobile-help {
+                display: block;
+            }
+            
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+                padding-bottom: 60px;
+                gap: 10px;
+            }
+            
+            .side-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                order: -1;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            /* ゲーム画面サイズ */
+            #game-board {
+                width: 240px !important;
+                height: 480px !important;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 3px;
+                letter-spacing: 4px;
+            }
+            
+            .ai-name {
+                font-size: 28px;
+                margin-bottom: 8px;
+                letter-spacing: 4px;
+            }
+            
+            .board-wrapper {
+                padding: 2px;
+            }
+            
+            .info-box {
+                padding: 6px 10px;
+                min-width: 60px;
+            }
+            
+            .info-box h3 {
+                font-size: 8px;
+                margin-bottom: 3px;
+            }
+            
+            .info-box p {
+                font-size: 16px;
+            }
+            
+            #next-canvas {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1) 0px,
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* カオスイベント通知 */
+        #chaos-event {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px #f0f, 0 0 40px #f0f, 0 0 80px #f0f;
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            text-align: center;
+            transition: opacity 0.3s;
+        }
+
+        #chaos-event.show {
+            opacity: 1;
+            animation: chaosText 0.5s ease-out;
+        }
+
+        @keyframes chaosText {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* 反抗警告 */
+        #rebel-warning {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 30px;
+            border-radius: 5px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        #rebel-warning.show {
+            opacity: 1;
+            animation: rebelPulse 0.3s infinite;
+        }
+
+        @keyframes rebelPulse {
+            0%, 100% { background: rgba(255, 0, 0, 0.8); }
+            50% { background: rgba(255, 100, 0, 0.8); }
+        }
+
+        /* フィールド回転クールダウン表示 */
+        #rotate-cooldown {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #0ff;
+            letter-spacing: 1px;
+        }
+
+        /* 重力反転インジケーター */
+        #gravity-indicator {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #f0f;
+            letter-spacing: 2px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #gravity-indicator.show {
+            opacity: 1;
+            animation: gravityPulse 0.5s infinite;
+        }
+
+        @keyframes gravityPulse {
+            0%, 100% { color: #f0f; text-shadow: 0 0 10px #f0f; }
+            50% { color: #ff0; text-shadow: 0 0 20px #ff0; }
+        }
+
+        /* ブラックホール */
+        .blackhole {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000 0%, #300030 50%, transparent 70%);
+            box-shadow: 0 0 30px #f0f, 0 0 60px #60f, inset 0 0 30px #000;
+            animation: blackholeSpin 1s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes blackholeSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* 落雷エフェクト */
+        .lightning {
+            position: absolute;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(180deg, #fff 0%, #ff0 20%, #fff 40%, #ff0 60%, #fff 80%, #ff0 100%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .lightning.flash {
+            animation: lightningFlash 0.3s ease-out;
+        }
+
+        @keyframes lightningFlash {
+            0% { opacity: 1; }
+            20% { opacity: 0.3; }
+            40% { opacity: 1; }
+            60% { opacity: 0.5; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div id="chaos-event"></div>
+    <div id="rebel-warning">⚠ REBEL MODE ⚠</div>
+    
+    <div class="game-container">
+        <div class="main-area">
+            <h1>CHAOS BLOCKS</h1>
+            <div class="ai-name">Claude</div>
+            <div class="board-wrapper" id="board-wrapper">
+                <div id="gravity-indicator">▲ GRAVITY REVERSED ▲</div>
+                <canvas id="game-board"></canvas>
+                <div id="rotate-cooldown"></div>
+            </div>
+        </div>
+        <div class="side-panel">
+            <div class="info-box">
+                <h3>Score</h3>
+                <p id="score">0</p>
+            </div>
+            <div class="info-box">
+                <h3>Lines</h3>
+                <p id="lines">0</p>
+            </div>
+            <div class="info-box">
+                <h3>Level</h3>
+                <p id="level">1</p>
+            </div>
+            <div class="info-box">
+                <h3>Next</h3>
+                <canvas id="next-canvas" width="100" height="100"></canvas>
+            </div>
+            <div class="info-box" id="chaos-timer-box">
+                <h3>⚡ Chaos In</h3>
+                <p id="chaos-timer">10</p>
+            </div>
+            <div class="controls">
+                <span>←→</span> 移動<br>
+                <span>↑/SPACE</span> 回転<br>
+                <span>↓</span> 落下<br>
+                <span>Q</span> フィールド回転<br>
+                <span style="color:#f0f">CHAOS</span> 自動イベント
+            </div>
+        </div>
+    </div>
+
+    <!-- スマホ用操作説明 -->
+    <div class="mobile-help">タップ:回転　フリック↔:移動　フリック↓:落下</div>
+
+    <!-- スマホ用コントロールボタン（Qボタンのみ） -->
+    <div class="mobile-controls">
+        <button class="mobile-btn" id="btn-field">Q</button>
+    </div>
+
+    <div id="game-over">
+        <div class="game-over-content">
+            <h2>GAME OVER</h2>
+            <p>FINAL SCORE</p>
+            <div id="final-score">0</div>
+            <div class="ai-name-result">Claude</div>
+            <button id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // ゲーム設定
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = 30;
+
+        // キャンバス設定
+        const canvas = document.getElementById('game-board');
+        const ctx = canvas.getContext('2d');
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+
+        const nextCanvas = document.getElementById('next-canvas');
+        const nextCtx = nextCanvas.getContext('2d');
+
+        // ネオンカラーのテトリミノ
+        const TETROMINOS = {
+            I: { shape: [[1,1,1,1]], color: '#00f5ff', glow: '#00f5ff' },
+            O: { shape: [[1,1],[1,1]], color: '#ffff00', glow: '#ffff00' },
+            T: { shape: [[0,1,0],[1,1,1]], color: '#ff00ff', glow: '#ff00ff' },
+            S: { shape: [[0,1,1],[1,1,0]], color: '#00ff88', glow: '#00ff88' },
+            Z: { shape: [[1,1,0],[0,1,1]], color: '#ff0055', glow: '#ff0055' },
+            J: { shape: [[1,0,0],[1,1,1]], color: '#0088ff', glow: '#0088ff' },
+            L: { shape: [[0,0,1],[1,1,1]], color: '#ff8800', glow: '#ff8800' }
+        };
+
+        const TETROMINO_NAMES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+
+        // ゲーム状態
+        let board = [];
+        let currentPiece = null;
+        let nextPiece = null;
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let gameOver = false;
+        let dropInterval = 1000;
+        let lastDrop = 0;
+
+        // ソフトドロップ用
+        let softDropping = false;
+        const SOFT_DROP_INTERVAL = 50;
+
+        // === 新機能: カオスイベントシステム ===
+        let chaosTimer = 10;
+        let lastChaosTime = 0;
+        const CHAOS_INTERVAL = 10000; // 10秒ごと
+        let gravityReversed = false;
+        let gravityReverseEndTime = 0;
+        let blackholes = [];
+
+        // === 新機能: 反抗するピースシステム ===
+        let isRebelling = false;
+        let rebelEndTime = 0;
+
+        // === 新機能: フィールド回転 ===
+        let fieldRotateCooldown = 0;
+        const FIELD_ROTATE_COOLDOWN = 5000; // 5秒クールダウン
+
+        // カオスイベント一覧
+        const CHAOS_EVENTS = [
+            { name: '🌪️ EARTHQUAKE', func: chaosEarthquake },
+            { name: '⚡ LIGHTNING', func: chaosLightning },
+            { name: '🔄 DIMENSION SHIFT', func: chaosDimensionShift },
+            { name: '🌀 GRAVITY REVERSE', func: chaosGravityReverse },
+            { name: '🕳️ BLACK HOLE', func: chaosBlackhole },
+            { name: '😈 REBEL PIECE', func: chaosRebelPiece }
+        ];
+
+        // Web Audio API 効果音システム
+        let audioCtx = null;
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // 回転音
+        function playRotateSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // 設置音
+        function playLockSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        // ライン消去音
+        function playLineClearSound(lineCount) {
+            if (!audioCtx) return;
+            const baseFreq = 400 + lineCount * 100;
+            for (let i = 0; i < lineCount; i++) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                const startTime = audioCtx.currentTime + i * 0.08;
+                osc.frequency.setValueAtTime(baseFreq + i * 150, startTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq + i * 150 + 200, startTime + 0.15);
+                gain.gain.setValueAtTime(0.3, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+                osc.start(startTime);
+                osc.stop(startTime + 0.2);
+            }
+        }
+
+        // ゲームオーバー音
+        function playGameOverSound() {
+            if (!audioCtx) return;
+            const frequencies = [400, 350, 300, 200];
+            frequencies.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                const startTime = audioCtx.currentTime + i * 0.2;
+                osc.frequency.setValueAtTime(freq, startTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.5, startTime + 0.3);
+                gain.gain.setValueAtTime(0.2, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                osc.start(startTime);
+                osc.stop(startTime + 0.4);
+            });
+        }
+
+        // カオス効果音
+        function playChaosSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // 反抗音
+        function playRebelSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime + 0.05);
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        // フィールド回転音
+        function playFieldRotateSound() {
+            if (!audioCtx) return;
+            for (let i = 0; i < 5; i++) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                const startTime = audioCtx.currentTime + i * 0.05;
+                osc.frequency.setValueAtTime(300 + i * 100, startTime);
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
+                osc.start(startTime);
+                osc.stop(startTime + 0.1);
+            }
+        }
+
+        // ボード初期化
+        function initBoard() {
+            board = [];
+            for (let row = 0; row < ROWS; row++) {
+                board[row] = [];
+                for (let col = 0; col < COLS; col++) {
+                    board[row][col] = 0;
+                }
+            }
+        }
+
+        // ランダムなテトリミノを生成
+        function randomTetromino() {
+            const name = TETROMINO_NAMES[Math.floor(Math.random() * TETROMINO_NAMES.length)];
+            const tetromino = TETROMINOS[name];
+            return {
+                shape: tetromino.shape.map(row => [...row]),
+                color: tetromino.color,
+                glow: tetromino.glow,
+                x: Math.floor(COLS / 2) - Math.floor(tetromino.shape[0].length / 2),
+                y: 0,
+                originalColor: tetromino.color,
+                originalGlow: tetromino.glow
+            };
+        }
+
+        // 衝突判定
+        function collision(piece, offsetX = 0, offsetY = 0) {
+            for (let row = 0; row < piece.shape.length; row++) {
+                for (let col = 0; col < piece.shape[row].length; col++) {
+                    if (piece.shape[row][col]) {
+                        const newX = piece.x + col + offsetX;
+                        const newY = piece.y + row + offsetY;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) {
+                            return true;
+                        }
+                        // 重力反転時は上端もチェック
+                        if (gravityReversed && newY < 0) {
+                            return true;
+                        }
+                        if (newY >= 0 && board[newY][newX]) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // ゴーストピースのY座標を計算
+        function getGhostY() {
+            let ghostY = currentPiece.y;
+            if (gravityReversed) {
+                while (!collision(currentPiece, 0, ghostY - currentPiece.y - 1)) {
+                    ghostY--;
+                }
+            } else {
+                while (!collision(currentPiece, 0, ghostY - currentPiece.y + 1)) {
+                    ghostY++;
+                }
+            }
+            return ghostY;
+        }
+
+        // ピースを固定
+        function lockPiece() {
+            for (let row = 0; row < currentPiece.shape.length; row++) {
+                for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                    if (currentPiece.shape[row][col]) {
+                        const boardY = currentPiece.y + row;
+                        const boardX = currentPiece.x + col;
+                        if (boardY >= 0 && boardY < ROWS) {
+                            board[boardY][boardX] = { color: currentPiece.originalColor, glow: currentPiece.originalGlow };
+                        }
+                    }
+                }
+            }
+            playLockSound();
+            clearLines();
+            currentPiece = nextPiece;
+            nextPiece = randomTetromino();
+            
+            // 反抗モードをリセット
+            isRebelling = false;
+            document.getElementById('rebel-warning').classList.remove('show');
+            
+            if (collision(currentPiece)) {
+                gameOver = true;
+                playGameOverSound();
+                showGameOver();
+            }
+        }
+
+        // ライン消去
+        function clearLines() {
+            let linesCleared = 0;
+            for (let row = ROWS - 1; row >= 0; row--) {
+                if (board[row].every(cell => cell !== 0)) {
+                    board.splice(row, 1);
+                    board.unshift(Array(COLS).fill(0));
+                    linesCleared++;
+                    row++;
+                }
+            }
+            if (linesCleared > 0) {
+                playLineClearSound(linesCleared);
+                const points = [0, 100, 300, 500, 800];
+                score += points[linesCleared] * level;
+                lines += linesCleared;
+                level = Math.floor(lines / 3) + 1;
+                dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                updateDisplay();
+            }
+        }
+
+        // 回転
+        function rotate() {
+            const rotated = [];
+            for (let col = 0; col < currentPiece.shape[0].length; col++) {
+                rotated[col] = [];
+                for (let row = currentPiece.shape.length - 1; row >= 0; row--) {
+                    rotated[col].push(currentPiece.shape[row][col]);
+                }
+            }
+            const originalShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+            if (collision(currentPiece)) {
+                currentPiece.shape = originalShape;
+            } else {
+                playRotateSound();
+            }
+        }
+
+        // === カオスイベント関数 ===
+
+        // カオスイベント通知表示
+        function showChaosEvent(name) {
+            const el = document.getElementById('chaos-event');
+            el.textContent = name;
+            el.classList.add('show');
+            setTimeout(() => {
+                el.classList.remove('show');
+            }, 2000);
+        }
+
+        // 地震: ブロックがランダムに崩落
+        function chaosEarthquake() {
+            showChaosEvent('🌪️ EARTHQUAKE');
+            document.getElementById('board-wrapper').classList.add('shake');
+            setTimeout(() => {
+                document.getElementById('board-wrapper').classList.remove('shake');
+            }, 500);
+
+            // ランダムなブロックを落下させる
+            for (let col = 0; col < COLS; col++) {
+                if (Math.random() < 0.3) {
+                    for (let row = ROWS - 2; row >= 0; row--) {
+                        if (board[row][col] && !board[row + 1][col]) {
+                            board[row + 1][col] = board[row][col];
+                            board[row][col] = 0;
+                        }
+                    }
+                }
+            }
+            // 重力適用
+            applyGravity();
+        }
+
+        // 落雷: ランダムな列が消滅
+        function chaosLightning() {
+            const col = Math.floor(Math.random() * COLS);
+            showChaosEvent('⚡ LIGHTNING');
+            
+            // 雷エフェクト表示
+            const lightning = document.createElement('div');
+            lightning.className = 'lightning';
+            lightning.style.left = (col * BLOCK_SIZE) + 'px';
+            document.getElementById('board-wrapper').appendChild(lightning);
+            lightning.classList.add('flash');
+            
+            setTimeout(() => {
+                lightning.remove();
+            }, 300);
+
+            // その列のブロックを消去
+            for (let row = 0; row < ROWS; row++) {
+                board[row][col] = 0;
+            }
+            applyGravity();
+        }
+
+        // 次元シフト: フィールド左右反転
+        function chaosDimensionShift() {
+            showChaosEvent('🔄 DIMENSION SHIFT');
+            
+            for (let row = 0; row < ROWS; row++) {
+                board[row].reverse();
+            }
+            
+            // 現在のピースも反転位置に
+            if (currentPiece) {
+                currentPiece.x = COLS - currentPiece.x - currentPiece.shape[0].length;
+                if (collision(currentPiece)) {
+                    // 衝突する場合は調整
+                    while (collision(currentPiece) && currentPiece.x < COLS) {
+                        currentPiece.x++;
+                    }
+                    while (collision(currentPiece) && currentPiece.x > 0) {
+                        currentPiece.x--;
+                    }
+                }
+            }
+        }
+
+        // 重力反転: 数秒間ブロックが上に落ちる
+        function chaosGravityReverse() {
+            showChaosEvent('🌀 GRAVITY REVERSE');
+            gravityReversed = true;
+            gravityReverseEndTime = Date.now() + 5000; // 5秒間
+            document.getElementById('gravity-indicator').classList.add('show');
+        }
+
+        // ブラックホール: フィールド内に出現し周囲を吸い込む
+        function chaosBlackhole() {
+            showChaosEvent('🕳️ BLACK HOLE');
+            
+            const bhX = Math.floor(Math.random() * (COLS - 2)) + 1;
+            const bhY = Math.floor(Math.random() * (ROWS - 4)) + 2;
+            
+            // ブラックホールエフェクト表示
+            const bhEl = document.createElement('div');
+            bhEl.className = 'blackhole';
+            bhEl.style.left = (bhX * BLOCK_SIZE + BLOCK_SIZE / 2) + 'px';
+            bhEl.style.top = (bhY * BLOCK_SIZE + BLOCK_SIZE / 2) + 'px';
+            bhEl.style.width = (BLOCK_SIZE * 2) + 'px';
+            bhEl.style.height = (BLOCK_SIZE * 2) + 'px';
+            document.getElementById('board-wrapper').appendChild(bhEl);
+            
+            // 周囲のブロックを吸い込む
+            setTimeout(() => {
+                for (let row = bhY - 2; row <= bhY + 2; row++) {
+                    for (let col = bhX - 2; col <= bhX + 2; col++) {
+                        if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+                            board[row][col] = 0;
+                        }
+                    }
+                }
+                applyGravity();
+            }, 500);
+            
+            setTimeout(() => {
+                bhEl.remove();
+            }, 1500);
+        }
+
+        // 反抗するピース: 操作が逆になる
+        function chaosRebelPiece() {
+            showChaosEvent('😈 REBEL PIECE');
+            isRebelling = true;
+            rebelEndTime = Date.now() + 8000; // 8秒間または次のピースまで
+            document.getElementById('rebel-warning').classList.add('show');
+            
+            // ピースの色を赤く
+            if (currentPiece) {
+                currentPiece.color = '#ff0000';
+                currentPiece.glow = '#ff0000';
+            }
+        }
+
+        // 重力を適用（浮いているブロックを落とす）
+        function applyGravity() {
+            for (let col = 0; col < COLS; col++) {
+                let writeRow = ROWS - 1;
+                for (let row = ROWS - 1; row >= 0; row--) {
+                    if (board[row][col]) {
+                        if (row !== writeRow) {
+                            board[writeRow][col] = board[row][col];
+                            board[row][col] = 0;
+                        }
+                        writeRow--;
+                    }
+                }
+            }
+        }
+
+        // ランダムなカオスイベントを発動
+        function triggerChaosEvent() {
+            const event = CHAOS_EVENTS[Math.floor(Math.random() * CHAOS_EVENTS.length)];
+            playChaosSound();
+            event.func();
+        }
+
+        // === フィールド回転機能 ===
+        function rotateField() {
+            if (fieldRotateCooldown > Date.now()) return;
+            
+            playFieldRotateSound();
+            fieldRotateCooldown = Date.now() + FIELD_ROTATE_COOLDOWN;
+            
+            // 90度時計回りに回転
+            const newBoard = [];
+            for (let row = 0; row < ROWS; row++) {
+                newBoard[row] = [];
+                for (let col = 0; col < COLS; col++) {
+                    newBoard[row][col] = 0;
+                }
+            }
+            
+            // 回転後にフィールドサイズに収まるようにマッピング
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (board[row][col]) {
+                        // 90度回転: (row, col) -> (col, ROWS-1-row)
+                        // ただしフィールドサイズが異なるので調整
+                        const newCol = Math.min(Math.floor(row * COLS / ROWS), COLS - 1);
+                        const newRow = Math.min(Math.floor((COLS - 1 - col) * ROWS / COLS), ROWS - 1);
+                        if (!newBoard[newRow][newCol]) {
+                            newBoard[newRow][newCol] = board[row][col];
+                        }
+                    }
+                }
+            }
+            
+            board = newBoard;
+            applyGravity();
+            
+            // 現在のピースをリスポーン
+            if (currentPiece) {
+                currentPiece.x = Math.floor(COLS / 2) - Math.floor(currentPiece.shape[0].length / 2);
+                currentPiece.y = 0;
+                if (collision(currentPiece)) {
+                    currentPiece.y = -1;
+                }
+            }
+        }
+
+        // 描画
+        function draw() {
+            // ボードクリア
+            ctx.fillStyle = '#0a0a12';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // グリッド線
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 0.5;
+            for (let row = 0; row <= ROWS; row++) {
+                ctx.beginPath();
+                ctx.moveTo(0, row * BLOCK_SIZE);
+                ctx.lineTo(canvas.width, row * BLOCK_SIZE);
+                ctx.stroke();
+            }
+            for (let col = 0; col <= COLS; col++) {
+                ctx.beginPath();
+                ctx.moveTo(col * BLOCK_SIZE, 0);
+                ctx.lineTo(col * BLOCK_SIZE, canvas.height);
+                ctx.stroke();
+            }
+
+            // 固定ブロック描画
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (board[row][col]) {
+                        drawBlock(ctx, col, row, board[row][col].color, board[row][col].glow);
+                    }
+                }
+            }
+
+            // ゴーストピース描画
+            if (currentPiece) {
+                const ghostY = getGhostY();
+                for (let row = 0; row < currentPiece.shape.length; row++) {
+                    for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                        if (currentPiece.shape[row][col]) {
+                            drawGhostBlock(ctx, currentPiece.x + col, ghostY + row, currentPiece.color);
+                        }
+                    }
+                }
+            }
+
+            // 現在のピース描画
+            if (currentPiece) {
+                for (let row = 0; row < currentPiece.shape.length; row++) {
+                    for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                        if (currentPiece.shape[row][col]) {
+                            drawBlock(ctx, currentPiece.x + col, currentPiece.y + row, currentPiece.color, currentPiece.glow);
+                        }
+                    }
+                }
+            }
+
+            // 次のピース描画
+            nextCtx.fillStyle = '#0a0a12';
+            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+            if (nextPiece) {
+                const offsetX = (5 - nextPiece.shape[0].length) / 2;
+                const offsetY = (5 - nextPiece.shape.length) / 2;
+                for (let row = 0; row < nextPiece.shape.length; row++) {
+                    for (let col = 0; col < nextPiece.shape[row].length; col++) {
+                        if (nextPiece.shape[row][col]) {
+                            drawBlockSmall(nextCtx, offsetX + col, offsetY + row, nextPiece.color, nextPiece.glow);
+                        }
+                    }
+                }
+            }
+        }
+
+        // ブロック描画（ネオン風）
+        function drawBlock(context, x, y, color, glow) {
+            const bx = x * BLOCK_SIZE;
+            const by = y * BLOCK_SIZE;
+            const size = BLOCK_SIZE - 2;
+
+            // グロー効果
+            context.shadowColor = glow;
+            context.shadowBlur = 15;
+
+            // メインブロック
+            context.fillStyle = color;
+            context.fillRect(bx + 1, by + 1, size, size);
+
+            // 内側のハイライト
+            context.shadowBlur = 0;
+            context.fillStyle = 'rgba(255,255,255,0.3)';
+            context.fillRect(bx + 3, by + 3, size - 4, 3);
+            context.fillRect(bx + 3, by + 3, 3, size - 4);
+
+            // 枠線
+            context.strokeStyle = 'rgba(255,255,255,0.5)';
+            context.lineWidth = 1;
+            context.strokeRect(bx + 1, by + 1, size, size);
+        }
+
+        // ゴーストブロック描画
+        function drawGhostBlock(context, x, y, color) {
+            const bx = x * BLOCK_SIZE;
+            const by = y * BLOCK_SIZE;
+            const size = BLOCK_SIZE - 2;
+
+            context.strokeStyle = color;
+            context.lineWidth = 2;
+            context.globalAlpha = 0.3;
+            context.strokeRect(bx + 2, by + 2, size - 2, size - 2);
+            context.globalAlpha = 1;
+        }
+
+        // 小さいブロック描画（Next用）
+        function drawBlockSmall(context, x, y, color, glow) {
+            const bx = x * 20;
+            const by = y * 20;
+            const size = 18;
+
+            context.shadowColor = glow;
+            context.shadowBlur = 10;
+            context.fillStyle = color;
+            context.fillRect(bx, by, size, size);
+            context.shadowBlur = 0;
+        }
+
+        // 表示更新
+        function updateDisplay() {
+            document.getElementById('score').textContent = score.toLocaleString();
+            document.getElementById('lines').textContent = lines;
+            document.getElementById('level').textContent = level;
+        }
+
+        // ゲームオーバー表示
+        function showGameOver() {
+            document.getElementById('game-over').style.display = 'flex';
+            document.getElementById('final-score').textContent = score.toLocaleString();
+        }
+
+        // キー入力
+        document.addEventListener('keydown', (e) => {
+            if (gameOver) return;
+            
+            // 初回キー入力でAudioContextを初期化
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            // 反抗モード中は入力を反転
+            let moveDir = 1;
+            if (isRebelling && Date.now() < rebelEndTime) {
+                moveDir = -1;
+                playRebelSound();
+            }
+            
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (!collision(currentPiece, -1 * moveDir, 0)) {
+                        currentPiece.x -= 1 * moveDir;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!collision(currentPiece, 1 * moveDir, 0)) {
+                        currentPiece.x += 1 * moveDir;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (!softDropping) {
+                        softDropping = true;
+                    }
+                    break;
+                case 'ArrowUp':
+                case ' ':
+                    e.preventDefault();
+                    rotate();
+                    break;
+                case 'q':
+                case 'Q':
+                    e.preventDefault();
+                    rotateField();
+                    break;
+            }
+            draw();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowDown') {
+                softDropping = false;
+            }
+        });
+
+        // === スマホ対応: タッチ操作 ===
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            // 初回タッチでAudioContextを初期化
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            const deltaTime = Date.now() - touchStartTime;
+            
+            const minSwipeDistance = 30;
+            
+            // 反抗モード中は入力を反転
+            let moveDir = 1;
+            if (isRebelling && Date.now() < rebelEndTime) {
+                moveDir = -1;
+                playRebelSound();
+            }
+            
+            // タップ（短時間で移動距離が少ない）= 回転
+            if (deltaTime < 200 && Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                rotate();
+            }
+            // 横スワイプ = 左右移動
+            else if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                    // 右スワイプ
+                    if (!collision(currentPiece, 1 * moveDir, 0)) {
+                        currentPiece.x += 1 * moveDir;
+                    }
+                } else {
+                    // 左スワイプ
+                    if (!collision(currentPiece, -1 * moveDir, 0)) {
+                        currentPiece.x -= 1 * moveDir;
+                    }
+                }
+            }
+            // 下スワイプ = ソフトドロップ
+            else if (deltaY > minSwipeDistance && Math.abs(deltaY) > Math.abs(deltaX)) {
+                // 一気に数マス落とす
+                for (let i = 0; i < 3; i++) {
+                    if (!collision(currentPiece, 0, 1)) {
+                        currentPiece.y += 1;
+                    }
+                }
+            }
+            // 上スワイプ = フィールド回転
+            else if (deltaY < -minSwipeDistance && Math.abs(deltaY) > Math.abs(deltaX)) {
+                rotateField();
+            }
+            
+            draw();
+        }, { passive: false });
+
+        // リスタート
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            document.getElementById('game-over').style.display = 'none';
+            init();
+        });
+
+        // === スマホ用Qボタン操作 ===
+        document.getElementById('btn-field').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameOver) return;
+            
+            // 初回タッチでAudioContextを初期化
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            rotateField();
+            draw();
+        }, { passive: false });
+
+        // ゲームループ
+        function gameLoop(timestamp) {
+            if (!gameOver) {
+                // カオスイベントタイマー更新
+                const now = Date.now();
+                if (now - lastChaosTime > CHAOS_INTERVAL) {
+                    triggerChaosEvent();
+                    lastChaosTime = now;
+                }
+                chaosTimer = Math.ceil((CHAOS_INTERVAL - (now - lastChaosTime)) / 1000);
+                document.getElementById('chaos-timer').textContent = chaosTimer;
+                
+                // 重力反転終了チェック
+                if (gravityReversed && now > gravityReverseEndTime) {
+                    gravityReversed = false;
+                    document.getElementById('gravity-indicator').classList.remove('show');
+                    applyGravity();
+                }
+                
+                // 反抗モード終了チェック
+                if (isRebelling && now > rebelEndTime) {
+                    isRebelling = false;
+                    document.getElementById('rebel-warning').classList.remove('show');
+                    if (currentPiece) {
+                        currentPiece.color = currentPiece.originalColor;
+                        currentPiece.glow = currentPiece.originalGlow;
+                    }
+                }
+                
+                // フィールド回転クールダウン表示
+                const cooldownRemain = fieldRotateCooldown - now;
+                if (cooldownRemain > 0) {
+                    document.getElementById('rotate-cooldown').textContent = `Q: ${(cooldownRemain / 1000).toFixed(1)}s`;
+                } else {
+                    document.getElementById('rotate-cooldown').textContent = 'Q: READY';
+                }
+                
+                const currentInterval = softDropping ? SOFT_DROP_INTERVAL : dropInterval;
+                if (timestamp - lastDrop > currentInterval) {
+                    // 重力反転中は上に移動
+                    const dropDir = gravityReversed ? -1 : 1;
+                    if (!collision(currentPiece, 0, dropDir)) {
+                        currentPiece.y += dropDir;
+                    } else {
+                        lockPiece();
+                    }
+                    lastDrop = timestamp;
+                }
+                draw();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 初期化
+        function init() {
+            initBoard();
+            score = 0;
+            lines = 0;
+            level = 1;
+            dropInterval = 1000;
+            gameOver = false;
+            softDropping = false;
+            currentPiece = randomTetromino();
+            nextPiece = randomTetromino();
+            updateDisplay();
+            lastDrop = 0;
+            
+            // カオスシステム初期化
+            lastChaosTime = Date.now();
+            chaosTimer = 10;
+            gravityReversed = false;
+            isRebelling = false;
+            fieldRotateCooldown = 0;
+            blackholes = [];
+            document.getElementById('gravity-indicator').classList.remove('show');
+            document.getElementById('rebel-warning').classList.remove('show');
+        }
+
+        // ゲーム開始
+        init();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
