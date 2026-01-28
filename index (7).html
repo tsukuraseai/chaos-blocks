@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAOS BLOCKS - AIが作ったゲーム</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 0% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(0, 255, 128, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        h1 {
+            color: #0ff;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 40px #0ff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff; }
+            to { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff, 0 0 120px #0ff; }
+        }
+
+        .subtitle {
+            color: #f0f;
+            font-size: 16px;
+            letter-spacing: 4px;
+            margin-bottom: 50px;
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .game-link {
+            display: block;
+            padding: 25px 30px;
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
+            border: 2px solid rgba(0,255,255,0.3);
+            border-radius: 15px;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-link:hover::before {
+            left: 100%;
+        }
+
+        .game-link:hover {
+            border-color: #0ff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .ai-name {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .game-title {
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 2px;
+        }
+
+        .game-link:nth-child(1) .ai-name { color: #f0f; text-shadow: 0 0 10px #f0f; }
+        .game-link:nth-child(2) .ai-name { color: #0ff; text-shadow: 0 0 10px #0ff; }
+        .game-link:nth-child(3) .ai-name { color: #0f8; text-shadow: 0 0 10px #0f8; }
+        .game-link:nth-child(4) .ai-name { color: #ff0; text-shadow: 0 0 10px #ff0; }
+        .game-link:nth-child(5) .ai-name { color: #f55; text-shadow: 0 0 10px #f55; }
+
+        .footer {
+            margin-top: 50px;
+            color: #666;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #0ff;
+            text-decoration: none;
+        }
+
+        .controls-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0,255,255,0.05);
+            border: 1px solid rgba(0,255,255,0.2);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .controls-info h3 {
+            color: #0ff;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .controls-info p {
+            color: #888;
+            font-size: 11px;
+            line-height: 2;
+            letter-spacing: 1px;
+        }
+
+        .controls-info span {
+            color: #fff;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+                letter-spacing: 4px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            .ai-name {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>CHAOS BLOCKS</h1>
+    <p class="subtitle">AIが作ったゲーム</p>
+
+    <div class="game-list">
+        <a href="claude-tetris.html" class="game-link">
+            <div class="ai-name">Claude</div>
+            <div class="game-title">CHAOS BLOCKS</div>
+        </a>
+        <a href="gpt-tetris.html" class="game-link">
+            <div class="ai-name">GPT</div>
+            <div class="game-title">NEO BLOCKS</div>
+        </a>
+        <a href="gemini-tetris.html" class="game-link">
+            <div class="ai-name">Gemini</div>
+            <div class="game-title">QUANTUM CHAOS</div>
+        </a>
+        <a href="grok-tetris.html" class="game-link">
+            <div class="ai-name">Grok</div>
+            <div class="game-title">NEO BLOCKS</div>
+        </a>
+        <a href="deepseek-tetris.html" class="game-link">
+            <div class="ai-name">DeepSeek</div>
+            <div class="game-title">NEO BLOCKS X</div>
+        </a>
+    </div>
+
+    <div class="controls-info">
+        <h3>操作方法</h3>
+        <p>
+            <span>PC:</span> ←→移動 / ↑回転 / ↓落下<br>
+            <span>スマホ:</span> タップ回転 / フリック移動・落下
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>YouTube: <a href="https://www.youtube.com/@tsukuraseai" target="_blank">@tsukuraseai</a></p>
+    </div>
+</body>
+</html>
