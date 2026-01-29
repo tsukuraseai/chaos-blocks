@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHAOS BLOCKS - AIが作ったゲーム</title>
+    <title>操作ガイド - CHAOS BLOCKS</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2K3KKVSHTQ"></script>
     <script>
@@ -25,10 +25,8 @@
             background: #0a0a0f;
             min-height: 100vh;
             font-family: 'Orbitron', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 40px 20px;
+            color: #fff;
         }
 
         body::before {
@@ -40,209 +38,387 @@
             bottom: 0;
             background: 
                 radial-gradient(ellipse at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 0% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 100% 100%, rgba(0, 255, 128, 0.1) 0%, transparent 50%);
+                radial-gradient(ellipse at 0% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
             pointer-events: none;
             z-index: -1;
         }
 
-        h1 {
-            color: #0ff;
-            font-size: 36px;
-            font-weight: 900;
-            letter-spacing: 8px;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 
-                0 0 10px #0ff,
-                0 0 20px #0ff,
-                0 0 40px #0ff;
-            animation: glow 2s ease-in-out infinite alternate;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        @keyframes glow {
-            from { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff; }
-            to { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff, 0 0 120px #0ff; }
+        h1 {
+            color: #0ff;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
         }
 
         .subtitle {
-            color: #f0f;
-            font-size: 16px;
-            letter-spacing: 4px;
-            margin-bottom: 50px;
-            text-shadow: 0 0 10px #f0f;
-        }
-
-        .game-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .game-link {
-            display: block;
-            padding: 25px 30px;
-            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1));
-            border: 2px solid rgba(0,255,255,0.3);
-            border-radius: 15px;
-            text-decoration: none;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .game-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .game-link:hover::before {
-            left: 100%;
-        }
-
-        .game-link:hover {
-            border-color: #0ff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .ai-name {
-            font-size: 28px;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-        }
-
-        .game-title {
-            font-size: 12px;
+            text-align: center;
             color: #888;
+            font-size: 12px;
             letter-spacing: 2px;
+            margin-bottom: 40px;
         }
 
-        .game-link:nth-child(1) .ai-name { color: #f0f; text-shadow: 0 0 10px #f0f; }
-        .game-link:nth-child(2) .ai-name { color: #0ff; text-shadow: 0 0 10px #0ff; }
-        .game-link:nth-child(3) .ai-name { color: #0f8; text-shadow: 0 0 10px #0f8; }
-        .game-link:nth-child(4) .ai-name { color: #ff0; text-shadow: 0 0 10px #ff0; }
-        .game-link:nth-child(5) .ai-name { color: #f55; text-shadow: 0 0 10px #f55; }
-
-        .footer {
-            margin-top: 50px;
-            color: #666;
-            font-size: 11px;
+        .back-link {
+            display: inline-block;
+            color: #0ff;
+            text-decoration: none;
+            font-size: 12px;
             letter-spacing: 2px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        /* 共通操作セクション */
+        .common-section {
+            background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(255,0,255,0.05));
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .common-section h2 {
+            color: #0ff;
+            font-size: 16px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-key {
+            background: rgba(0,255,255,0.2);
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #0ff;
+            min-width: 80px;
             text-align: center;
         }
 
-        .footer a {
-            color: #0ff;
-            text-decoration: none;
-        }
-
-        .controls-info {
-            margin-top: 40px;
-            padding: 20px;
-            background: rgba(0,255,255,0.05);
-            border: 1px solid rgba(0,255,255,0.2);
-            border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .controls-info h3 {
-            color: #0ff;
+        .control-desc {
             font-size: 12px;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
+            color: #ccc;
         }
 
-        .controls-info p {
-            color: #888;
-            font-size: 11px;
-            line-height: 2;
-            letter-spacing: 1px;
-        }
-
-        .controls-info span {
-            color: #fff;
-        }
-
-        .guide-link {
-            display: block;
-            margin-top: 15px;
-            color: #f0f;
-            text-decoration: none;
-            font-size: 11px;
-            letter-spacing: 1px;
+        /* ゲーム別セクション */
+        .game-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
             transition: all 0.3s;
         }
 
-        .guide-link:hover {
-            text-shadow: 0 0 10px #f0f;
+        .game-section:hover {
+            border-color: rgba(255,255,255,0.2);
         }
 
-        @media (max-width: 480px) {
+        .game-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ai-name {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 3px;
+        }
+
+        .game-title {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 2px;
+        }
+
+        .game-section:nth-child(1) .ai-name { color: #f0f; text-shadow: 0 0 10px #f0f; }
+        .game-section:nth-child(2) .ai-name { color: #0ff; text-shadow: 0 0 10px #0ff; }
+        .game-section:nth-child(3) .ai-name { color: #0f8; text-shadow: 0 0 10px #0f8; }
+        .game-section:nth-child(4) .ai-name { color: #ff0; text-shadow: 0 0 10px #ff0; }
+        .game-section:nth-child(5) .ai-name { color: #f55; text-shadow: 0 0 10px #f55; }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-name {
+            color: #0ff;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .feature-key {
+            display: inline-block;
+            background: rgba(255,0,255,0.2);
+            border: 1px solid #f0f;
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 10px;
+            color: #f0f;
+            margin-left: 5px;
+        }
+
+        .chaos-tag {
+            display: inline-block;
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #f55;
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 10px;
+            color: #f55;
+            margin-left: 5px;
+        }
+
+        .play-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            color: #0ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .play-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0,255,255,0.5);
+        }
+
+        @media (max-width: 600px) {
             h1 {
-                font-size: 24px;
-                letter-spacing: 4px;
+                font-size: 20px;
+                letter-spacing: 3px;
             }
-            
-            .subtitle {
-                font-size: 12px;
+
+            .control-grid {
+                grid-template-columns: 1fr;
             }
-            
+
             .ai-name {
-                font-size: 22px;
+                font-size: 20px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <h1>CHAOS BLOCKS</h1>
-    <p class="subtitle">AIが作ったゲーム</p>
+    <div class="container">
+        <a href="index.html" class="back-link">← ゲーム選択に戻る</a>
+        
+        <h1>操作ガイド</h1>
+        <p class="subtitle">CHAOS BLOCKS - 各ゲームの説明</p>
 
-    <div class="game-list">
-        <a href="claude-tetris.html" class="game-link">
-            <div class="ai-name">Claude</div>
-            <div class="game-title">CHAOS BLOCKS</div>
-        </a>
-        <a href="gpt-tetris.html" class="game-link">
-            <div class="ai-name">GPT</div>
-            <div class="game-title">NEO BLOCKS</div>
-        </a>
-        <a href="gemini-tetris.html" class="game-link">
-            <div class="ai-name">Gemini</div>
-            <div class="game-title">QUANTUM CHAOS</div>
-        </a>
-        <a href="grok-tetris.html" class="game-link">
-            <div class="ai-name">Grok</div>
-            <div class="game-title">NEO BLOCKS</div>
-        </a>
-        <a href="deepseek-tetris.html" class="game-link">
-            <div class="ai-name">DeepSeek</div>
-            <div class="game-title">NEO BLOCKS X</div>
-        </a>
-    </div>
+        <!-- 共通操作 -->
+        <div class="common-section">
+            <h2>🎮 共通操作</h2>
+            <div class="control-grid">
+                <div class="control-item">
+                    <span class="control-key">← →</span>
+                    <span class="control-desc">左右移動</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">↑ / Space</span>
+                    <span class="control-desc">回転</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">↓</span>
+                    <span class="control-desc">落下</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">タップ</span>
+                    <span class="control-desc">回転（スマホ）</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">フリック↔</span>
+                    <span class="control-desc">移動（スマホ）</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">フリック↓</span>
+                    <span class="control-desc">落下（スマホ）</span>
+                </div>
+            </div>
+        </div>
 
-    <div class="controls-info">
-        <h3>操作方法</h3>
-        <p>
-            <span>PC:</span> ←→移動 / ↑回転 / ↓落下<br>
-            <span>スマホ:</span> タップ回転 / フリック移動・落下
-        </p>
-        <a href="guide.html" class="guide-link">📖 各ゲームの詳しい説明を見る</a>
-    </div>
+        <!-- 各ゲーム説明 -->
+        <div class="game-section">
+            <div class="game-header">
+                <span class="ai-name">Claude</span>
+                <span class="game-title">CHAOS BLOCKS</span>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-name">カオスイベント</span><span class="chaos-tag">自動発生</span><br>
+                    一定時間ごとにランダムなイベントが発生！重力反転、ブロック消去、加速など
+                </li>
+                <li>
+                    <span class="feature-name">フィールド回転</span><span class="feature-key">Q</span><br>
+                    フィールド全体を90度回転させる。ピンチを切り抜ける切り札！
+                </li>
+                <li>
+                    <span class="feature-name">反抗モード</span><span class="chaos-tag">自動発生</span><br>
+                    ブロックが意思を持ち、操作が逆になることがある
+                </li>
+            </ul>
+            <a href="claude-tetris.html" class="play-btn">▶ PLAY</a>
+        </div>
 
-    <div class="footer">
-        <p>YouTube: <a href="https://www.youtube.com/@tsukuraseai" target="_blank">@tsukuraseai</a></p>
+        <div class="game-section">
+            <div class="game-header">
+                <span class="ai-name">GPT</span>
+                <span class="game-title">NEO BLOCKS</span>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-name">Wind Drift</span><span class="chaos-tag">常時</span><br>
+                    風が吹いてブロックが自動で左右に流される
+                </li>
+                <li>
+                    <span class="feature-name">Phase Seeds</span><span class="chaos-tag">自動発生</span><br>
+                    フィールドに出現する謎のシード。触れると何かが起こる？
+                </li>
+                <li>
+                    <span class="feature-name">Quick Swirl</span><span class="feature-key">Q</span><br>
+                    現在のブロックを渦巻き状に変形させる
+                </li>
+                <li>
+                    <span class="feature-name">Quantum Swaps</span><span class="chaos-tag">自動発生</span><br>
+                    ブロックが突然別の形に変わることがある
+                </li>
+            </ul>
+            <a href="gpt-tetris.html" class="play-btn">▶ PLAY</a>
+        </div>
+
+        <div class="game-section">
+            <div class="game-header">
+                <span class="ai-name">Gemini</span>
+                <span class="game-title">QUANTUM CHAOS</span>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-name">Quantum Polymorph</span><span class="chaos-tag">自動発生</span><br>
+                    落下中のブロックが勝手に別の形に変異する
+                </li>
+                <li>
+                    <span class="feature-name">Nuke Block</span><span class="chaos-tag">ランダム出現</span><br>
+                    ☢マーク付きのブロック。設置すると周囲を爆破消滅！
+                </li>
+                <li>
+                    <span class="feature-name">Meteor Shower</span><span class="chaos-tag">自動発生</span><br>
+                    空からランダムにゴミブロックが降ってくる
+                </li>
+                <li>
+                    <span class="feature-name">Glitch Controls</span><span class="chaos-tag">自動発生</span><br>
+                    突然操作が左右反転することがある
+                </li>
+            </ul>
+            <a href="gemini-tetris.html" class="play-btn">▶ PLAY</a>
+        </div>
+
+        <div class="game-section">
+            <div class="game-header">
+                <span class="ai-name">Grok</span>
+                <span class="game-title">NEO BLOCKS</span>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-name">Portal</span><span class="chaos-tag">自動発生</span><br>
+                    フィールドにポータルが出現。ブロックがワープする！
+                </li>
+                <li>
+                    <span class="feature-name">Quantum Mutation</span><span class="chaos-tag">自動発生</span><br>
+                    固定されたブロックが突然変異して形が変わる
+                </li>
+                <li>
+                    <span class="feature-name">Bonus Time</span><span class="chaos-tag">自動発生</span><br>
+                    落下速度が半分になるボーナスタイム
+                </li>
+                <li>
+                    <span class="feature-name">Line Shuffle</span><span class="chaos-tag">自動発生</span><br>
+                    ラインがランダムにシャッフルされる
+                </li>
+            </ul>
+            <a href="grok-tetris.html" class="play-btn">▶ PLAY</a>
+        </div>
+
+        <div class="game-section">
+            <div class="game-header">
+                <span class="ai-name">DeepSeek</span>
+                <span class="game-title">NEO BLOCKS X</span>
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-name">Beam Cut</span><span class="feature-key">C</span><br>
+                    縦一列をビームで切断して消去する（回数制限あり）
+                </li>
+                <li>
+                    <span class="feature-name">Gravity Reverse</span><span class="feature-key">G</span><br>
+                    重力を反転させる（クールダウンあり）
+                </li>
+                <li>
+                    <span class="feature-name">Time Warp</span><span class="feature-key">Space長押し</span><br>
+                    時間の流れを加速させる
+                </li>
+                <li>
+                    <span class="feature-name">Time Stop</span><span class="feature-key">X</span><br>
+                    時間を完全に停止させる
+                </li>
+                <li>
+                    <span class="feature-name">Quantum Entanglement</span><span class="chaos-tag">自動発生</span><br>
+                    2つのブロックが量子もつれ状態になり、同時に動く
+                </li>
+            </ul>
+            <a href="deepseek-tetris.html" class="play-btn">▶ PLAY</a>
+        </div>
+
     </div>
 </body>
 </html>
